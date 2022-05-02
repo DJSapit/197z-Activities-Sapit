@@ -48,6 +48,10 @@ if __name__ == "__main__":
         tar = tarfile.open(fname, "r:gz")
         tar.extractall()
         tar.close()
+        if os.path.exists(default_config["train_split"]):
+            print("drinks dataset downloaded successfully")
+        else:
+            raise Exception("drinks dataset download failed")
 
     args = get_args()
     print(args)
