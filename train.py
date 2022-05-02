@@ -1,3 +1,5 @@
+import os
+import requests
 import torch
 import multiprocessing as mp
 import wandb
@@ -11,7 +13,6 @@ import torchvision.transforms as T
 from utils import collate_fn, evaluate_iou, pred2boxes, target2boxes
 from datasets import DrinksDataset
 from config import project_name, default_config
-import pycocotools
 from engine import evaluate
 
 
@@ -36,6 +37,12 @@ def get_args():
     return args
 
 if __name__ == "__main__":
+
+    if not os.path.exists(default_config["drinks/labels_train.csv"]):
+        url = 'https://github.com/DJSapit/Drinks-Dataset-Faster-RCNN/releases/download/v0.1.0-alpha/drinks.tar.gz'
+        print(f'downloading drinks dataset from {url}')
+        r = requests.get(url, allow_redirects=True)
+        open('drinks.tar.gz', 'wb').write(r.content)
 
     args = get_args()
     print(args)
