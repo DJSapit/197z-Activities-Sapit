@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     if not os.path.exists(default_config["train_split"]):
         fname = "drinks.tar.gz"
-        url = f'https://github.com/DJSapit/Drinks-Dataset-Faster-RCNN/releases/download/v0.1.0-alpha/{fname}'
+        url = f'https://github.com/DJSapit/Drinks-Dataset-Faster-RCNN-Sapit/releases/download/v0.1.0-alpha/{fname}'
         print(f'downloading drinks dataset from {url}')
         r = requests.get(url, allow_redirects=True)
         open('drinks.tar.gz', 'wb').write(r.content)
@@ -107,8 +107,7 @@ class FasterRCNNModel(LightningModule):
     # this is called at the end of an epoch
     def test_step(self, batch, batch_idx):
         images, targets = batch
-        # fasterrcnn takes only images for eval() mode
-        with torch.no_grad(): ### TODO: check if this is necessary
+        with torch.no_grad():
             outs = self.model(images)
 
         if (args.max_epochs == 1) or (args.no_cft_eval):
@@ -227,26 +226,6 @@ if __name__ == "__main__":
 
     model.cuda()
     trainer.fit(model)
-
-    """    
-    print("testing latest checkpoint")
-    trainer.test(model)
-
-    test_data = DataLoader(DrinksDataset(default_config["test_split"]),
-                         batch_size=default_config['batch_size'],
-                         shuffle=False,
-                         num_workers=default_config['num_workers'],
-                         pin_memory=default_config['pin_memory'],
-                         collate_fn=collate_fn)
-    evaluate(model, test_data, device=torch.device("cuda"))
-    
-    str_merge = '/' if len(default_config["checkpoint_dir"]) > 0 else ''
-    if args.not_mobile:
-        filename = default_config["checkpoint_dir"] + str_merge + 'fasterrcnn-latest.ckpt'
-    else:
-        filename = default_config["checkpoint_dir"] + str_merge + 'fasterrcnn-mobile-latest.ckpt'
-    trainer.save_checkpoint(filename)
-    """
 
     print("testing best checkpoint according to val_epoch_iou")
     print("best_model_path:", checkpoint_callback.best_model_path)

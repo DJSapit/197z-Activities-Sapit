@@ -4,7 +4,7 @@ project_name = "Object Detection on Drinks dataset using Faster R-CNN Model - Da
 
 class_labels = {0:'background', 1:'Water', 2:'Soda', 3:'Juice'}
 
-best_model_dir = "models/fasterrcnn_drinks_best.ckpt"
+pretrained_model_dir = "models/fasterrcnn_drinks_pretrained.ckpt"
 
 default_config = {
         "precision": 16,
