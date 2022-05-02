@@ -1,5 +1,6 @@
 import os
 import requests
+import tarfile
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch.utils.data import DataLoader
@@ -50,6 +51,20 @@ class FasterRCNNModelTest(LightningModule):
                          collate_fn=collate_fn)
 
 if __name__ == '__main__':
+
+    if not os.path.exists(default_config["test_split"]):
+        fname = "drinks.tar.gz"
+        url = f'https://github.com/DJSapit/Drinks-Dataset-Faster-RCNN-Sapit/releases/download/v0.1.0-alpha/{fname}'
+        print(f'downloading drinks dataset from {url}')
+        r = requests.get(url, allow_redirects=True)
+        open('drinks.tar.gz', 'wb').write(r.content)
+        tar = tarfile.open(fname, "r:gz")
+        tar.extractall()
+        tar.close()
+        if os.path.exists(default_config["test_split"]):
+            print("drinks dataset downloaded successfully")
+        else:
+            raise Exception("drinks dataset download failed")
 
     if not os.path.exists(pretrained_model_dir):
         os.makedirs(os.path.dirname(pretrained_model_dir), exist_ok=True)

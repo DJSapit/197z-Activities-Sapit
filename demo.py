@@ -32,7 +32,7 @@ class FasterRCNNModelEval(LightningModule):
 #    param.grad = None
 
 class_labels = {0:'background', 1:'Summit', 2:'Coke', 3:'Pine Juice'}
-class_colors = {0:(0,0,0), 1:(255,51,51), 2:(51,51,255), 3:(51,255,51)}
+class_colors = {0:(0,0,0), 1:(255,102,102), 2:(51,51,255), 3:(51,255,51)}
 
 
 def run_video_demo(model, camera, record, filename):
@@ -68,7 +68,7 @@ def run_video_demo(model, camera, record, filename):
             
             for box, label, score in zip(predictions['boxes'], predictions['labels'], predictions['scores']):
                 label = label.item()
-                if label == 0 or score < 0.98:
+                if label == 0 or score < 0.95:
                     continue
                 minX, minY, maxX, maxY = box.int().tolist()
                 #print(minX, minY, maxX, maxY, label, score.item())
@@ -85,7 +85,7 @@ def run_video_demo(model, camera, record, filename):
             cv2.imshow('frame',frame)
             if videowriter is not None:
                 if videowriter.isOpened():
-                    videowriter.write(image)
+                    videowriter.write(frame)
             if cv2.waitKey(1) == ord('q'):
                 break
 

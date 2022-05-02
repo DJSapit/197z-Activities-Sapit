@@ -19,21 +19,24 @@ from engine import evaluate
 
 def get_args():
     parser = ArgumentParser(description="PyTorch Lightning Drinks Dataset test")
-    parser.add_argument("--precision", type=int,    default=default_config["precision"], choices=[16, 32], help="use 32 or 16 bit precision in training")
-    parser.add_argument("--max-epochs", type=int,   default=default_config["max_epochs"], help="num epochs")
-    parser.add_argument("--batch-size", type=int,   default=default_config["batch_size"], help="batch size")
-    parser.add_argument("--lr", type=float,         default=default_config["lr"], help="learning rate")
-    parser.add_argument("--num-workers", type=int,  default=default_config["num_workers"], help="num workers")
-    parser.add_argument("--num-classes", type=int,  default=default_config["num_classes"], help="num classes")
-    parser.add_argument("--devices",                default=default_config["devices"])
-    parser.add_argument("--accelerator",            default=default_config["accelerator"])
-    parser.add_argument("--confidence-threshold", type=float, default=default_config["confidence_threshold"], help="confidence threshold")
-    parser.add_argument("--no-wandb",               default=False, action='store_true')
+    parser.add_argument("--precision", type=int,    default=default_config["precision"], choices=[16, 32], help="use 32 or 16 bit precision in training, "
+                                                                                                                f"default = {default_config['precision']}")
+    parser.add_argument("--max-epochs", type=int,   default=default_config["max_epochs"], help=f"default = {default_config['max_epochs']}")
+    parser.add_argument("--batch-size", type=int,   default=default_config["batch_size"], help=f"default = {default_config['batch_size']}")
+    parser.add_argument("--lr", type=float,         default=default_config["lr"], help=f"learning rate, default = {default_config['lr']}")
+    parser.add_argument("--num-workers", type=int,  default=default_config["num_workers"], help=f"default = {default_config['num_workers']}")
+    parser.add_argument("--num-classes", type=int,  default=default_config["num_classes"], help=f"default = {default_config['num_classes']}")
+    parser.add_argument("--devices",                default=default_config["devices"], help=f'default = {default_config["devices"]}')
+    parser.add_argument("--accelerator",            default=default_config["accelerator"], help=f'default = {default_config["accelerator"]}')
+    parser.add_argument("--confidence-threshold", type=float, default=default_config["confidence_threshold"], help="used for filtering detections shown in W&B tables "
+                                                                                                                    "and for dynamic cft during evaluation, "
+                                                                                                                    f"default = {default_config['confidence_threshold']}")
+    parser.add_argument("--no-wandb",               default=False, action='store_true', help="disable wandb logging during end of each validation batch")
     parser.add_argument("--not-mobile",             default=False, action='store_true', help="use the resnet50 backbone instead of mobilenet")
     parser.add_argument("--no-cft-eval",            default=False, action='store_true', help="disable confidence threshold during evaluation")
-    parser.add_argument("--dynamic-cft-eval",       default=False, action='store_true', help="cft used in evaluation linearly increases"
-                                                                                             "from 0 to specified threshold")
-    parser.add_argument("-q", "--quiet",            default=False, action='store_true')
+    parser.add_argument("--dynamic-cft-eval",       default=False, action='store_true', help="cft used in evaluation linearly increases "
+                                                                                             "from 0 to specified threshold for every epoch")
+    parser.add_argument("-q", "--quiet",            default=False, action='store_true', help="disables printing of arguments that are different from default")
     args = parser.parse_args()
     return args
 
