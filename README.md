@@ -45,6 +45,8 @@ Demo
 ```bash
 python demo.py
 ```
+Pretrained Model used for webcam inference is automatically downloaded.
+
 
 For `train.py` and `demo.py`, add `-h` or `--help` to see a list of commands.
 
