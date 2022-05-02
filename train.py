@@ -39,7 +39,7 @@ def get_args():
 
 if __name__ == "__main__":
 
-    if not os.path.exists(default_config["drinks/labels_train.csv"]):
+    if not os.path.exists(default_config["train_split"]):
         fname = "drinks.tar.gz"
         url = f'https://github.com/DJSapit/Drinks-Dataset-Faster-RCNN/releases/download/v0.1.0-alpha/{fname}'
         print(f'downloading drinks dataset from {url}')
