@@ -23,6 +23,8 @@ Installation
     ```bash
     pip install -r requirements.txt
     ```
+Sidenote: some packages may not work properly when run on a conda environment where the libraries are installed using conda. 
+
 Testing
 ----------
 
