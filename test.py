@@ -57,7 +57,8 @@ if __name__ == '__main__':
         url = f'https://github.com/DJSapit/Drinks-Dataset-Faster-RCNN-Sapit/releases/download/v0.1.0-alpha/{fname}'
         print(f'downloading drinks dataset from {url}')
         r = requests.get(url, allow_redirects=True)
-        open('drinks.tar.gz', 'wb').write(r.content)
+        with open('drinks.tar.gz', 'wb') as file:
+            file.write(r.content)
         tar = tarfile.open(fname, "r:gz")
         tar.extractall()
         tar.close()
@@ -72,7 +73,8 @@ if __name__ == '__main__':
         url = f'https://github.com/DJSapit/Drinks-Dataset-Faster-RCNN-Sapit/releases/download/v0.1.0-alpha/{fname}'
         print(f'downloading pretrained model from {url}')
         r = requests.get(url, allow_redirects=True)
-        open(pretrained_model_dir, 'wb').write(r.content)
+        with open(pretrained_model_dir, 'wb') as file:
+            file.write(r.content)
         if os.path.exists(pretrained_model_dir):
             print("pretrained model downloaded successfully")
         else:

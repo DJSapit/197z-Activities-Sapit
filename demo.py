@@ -1,3 +1,5 @@
+import os
+import requests
 import numpy as np
 import cv2
 import torch
@@ -117,6 +119,19 @@ if __name__ == '__main__':
                         help="Display fps")
 
     args = parser.parse_args()
+
+    if not os.path.exists(pretrained_model_dir):
+        os.makedirs(os.path.dirname(pretrained_model_dir), exist_ok=True)
+        fname = os.path.basename(pretrained_model_dir)
+        url = f'https://github.com/DJSapit/Drinks-Dataset-Faster-RCNN-Sapit/releases/download/v0.1.0-alpha/{fname}'
+        print(f'downloading pretrained model from {url}')
+        r = requests.get(url, allow_redirects=True)
+        with open(pretrained_model_dir, 'wb') as file:
+            file.write(r.content)
+        if os.path.exists(pretrained_model_dir):
+            print("pretrained model downloaded successfully")
+        else:
+            raise Exception("pretrained model download failed")
 
     model = FasterRCNNModelEval(num_classes=4)
     model = model.load_from_checkpoint(args.model_path)
