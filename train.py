@@ -11,6 +11,7 @@ from pytorch_lightning.loggers import WandbLogger
 from torch.utils.data import DataLoader
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn, fasterrcnn_mobilenet_v3_large_320_fpn
 import torchvision.transforms as T
+from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from utils import collate_fn, evaluate_iou, pred2boxes, target2boxes
 from datasets import DrinksDataset
 from config import project_name, default_config
@@ -80,7 +81,7 @@ if __name__ == "__main__":
 
 
 class FasterRCNNModel(LightningModule):
-    def __init__(self, num_classes=4, lr=0.005, batch_size=4):
+    def __init__(self, num_classes=4, lr=0.001, batch_size=4):
         super().__init__()
         self.lr = lr
         self.save_hyperparameters()
@@ -112,7 +113,7 @@ class FasterRCNNModel(LightningModule):
     def test_step(self, batch, batch_idx):
         images, targets = batch
         with torch.no_grad():
-            outs = self.model(images)
+            preds = self.model(images)
 
         if (args.max_epochs == 1) or (args.no_cft_eval):
             cft = 0
@@ -122,22 +123,33 @@ class FasterRCNNModel(LightningModule):
             current_epoch = self.current_epoch if self.current_epoch <= (args.max_epochs - 1) else (args.max_epochs - 1)
             cft = confidence_threshold*current_epoch/(args.max_epochs - 1)
 
-        iou = torch.stack([evaluate_iou(t, o, cft) for t, o in zip(targets, outs)]).mean()
-        return {"iou": iou, "pred": outs}
+        iou = torch.stack([evaluate_iou(t, o, cft) for t, o in zip(targets, preds)]).mean()
+        metric = MeanAveragePrecision()
+        metric.update(preds, targets)
+        apr_dict = metric.compute()
+        return {"iou": iou, "pred": preds, "map": apr_dict["map"], "mar_100": apr_dict["mar_100"]}
 
     # this is called at the end of all epochs
     def test_epoch_end(self, outputs):
         avg_iou = torch.stack([o["iou"] for o in outputs]).mean()
+        mAP = torch.stack([o["map"] for o in outputs]).mean()
+        mar_100 = torch.stack([o["mar_100"] for o in outputs]).mean()
         self.log("test_epoch_iou", avg_iou)
-        return {"test_iou": avg_iou}
+        self.log("test_epoch_map", mAP)
+        self.log("test_epoch_mar_100", mar_100)
+        return {"test_iou": avg_iou, "test_map": mAP, "test_mar_100": mar_100}
 
     def validation_step(self, batch, batch_idx):
        return self.test_step(batch, batch_idx)
 
     def validation_epoch_end(self, outputs):
         avg_iou = torch.stack([o["iou"] for o in outputs]).mean()
+        mAP = torch.stack([o["map"] for o in outputs]).mean()
+        mar_100 = torch.stack([o["mar_100"] for o in outputs]).mean()
         self.log("val_epoch_iou", avg_iou)
-        return {"val_iou": avg_iou}
+        self.log("val_epoch_map", mAP)
+        self.log("val_epoch_mar_100", mar_100)
+        return {"val_iou": avg_iou, "val_map": mAP, "val_mar_100": mar_100}
 
     def configure_optimizers(self):
         return torch.optim.SGD(
@@ -210,12 +222,12 @@ if __name__ == "__main__":
     wandb_logger = WandbLogger(project=project_name)
     
     if args.not_mobile:
-        filename = 'fasterrcnn-{epoch}-{val_epoch_iou:.3f}'
+        filename = 'fasterrcnn-{epoch}-{val_epoch_map:.3f}'
     else:
-        filename = 'fasterrcnn-mobile-{epoch}-{val_epoch_iou:.3f}'
+        filename = 'fasterrcnn-mobile-{epoch}-{val_epoch_map:.3f}'
     
     checkpoint_callback = ModelCheckpoint(save_top_k=default_config["save_top_k"],
-                                        monitor="val_epoch_iou",
+                                        monitor="val_epoch_map",
                                         mode="max",
                                         dirpath=default_config["checkpoint_dir"],
                                         filename=filename)
@@ -231,7 +243,7 @@ if __name__ == "__main__":
     model.cuda()
     trainer.fit(model)
 
-    print("testing best checkpoint according to val_epoch_iou")
+    print("testing best checkpoint according to val_epoch_map")
     print("best_model_path:", checkpoint_callback.best_model_path)
     model = FasterRCNNModel.load_from_checkpoint(checkpoint_callback.best_model_path)
     model.cuda()

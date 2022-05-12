@@ -5,6 +5,7 @@ import torch
 from pytorch_lightning import LightningModule, Trainer
 from torch.utils.data import DataLoader
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn, fasterrcnn_mobilenet_v3_large_320_fpn
+from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from datasets import DrinksDataset
 from config import pretrained_model_dir
 from utils import collate_fn, evaluate_iou
@@ -29,15 +30,22 @@ class FasterRCNNModelTest(LightningModule):
 
     def test_step(self, batch, batch_idx):
         images, targets = batch
-        outs = self.model(images)
+        preds = self.model(images)
         cft = 0.6
-        iou = torch.stack([evaluate_iou(t, o, cft) for t, o in zip(targets, outs)]).mean()
-        return {"iou": iou, "pred": outs}
+        iou = torch.stack([evaluate_iou(t, o, cft) for t, o in zip(targets, preds)]).mean()
+        metric = MeanAveragePrecision()
+        metric.update(preds, targets)
+        apr_dict = metric.compute()
+        return {"iou": iou, "pred": preds, "map": apr_dict["map"], "mar_100": apr_dict["mar_100"]}
 
     def test_epoch_end(self, outputs):
         avg_iou = torch.stack([o["iou"] for o in outputs]).mean()
+        mAP = torch.stack([o["map"] for o in outputs]).mean()
+        mar_100 = torch.stack([o["mar_100"] for o in outputs]).mean()
         self.log("test_epoch_iou", avg_iou)
-        return {"test_iou": avg_iou}
+        self.log("test_epoch_map", mAP)
+        self.log("test_epoch_mar_100", mar_100)
+        return {"test_iou": avg_iou, "test_map": mAP, "test_mar_100": mar_100}
     
     def setup(self, stage=None):
         self.test_dataloader()
@@ -84,7 +92,7 @@ if __name__ == '__main__':
 
     model = FasterRCNNModelTest.load_from_checkpoint(pretrained_model_dir)
     model.cuda().eval()
-    trainer = Trainer(enable_model_summary=False, accelerator="auto", devices="auto")
+    trainer = Trainer(enable_model_summary=False, accelerator="auto", devices="auto", max_epochs=1)
     trainer.test(model)
     test_data = DataLoader(DrinksDataset(default_config["test_split"]),
                          batch_size=default_config['batch_size'],
