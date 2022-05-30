@@ -18,6 +18,7 @@ Installation
     pip install -r requirements.txt
     ```
 Sidenote: some packages may not work properly when run on a conda environment where the libraries are installed using conda. 
+Some listed packages may came from the previous activity, Drinks Dataset, and may not need to be installed.
 
 
 Training
@@ -26,15 +27,16 @@ Training
 ```bash
 python train.py
 ```
-Dataset used for testing is automatically downloaded.
-
+Highest test accuracy achieved was 93% with a 651k parameter model.
+ 
 KWS Inference
 ----------
 
 ```bash
 python kws-infer.py
 ```
-Pretrained Model is automatically downloaded.
+Pretrained Model is automatically downloaded. Use '--button' flag to enable manual activation of recording.
+Press 'q' and 'esc' to quit, and any other key to activate recording.
 
 
 For `train.py` and `kws-infer.py`, add `-h` or `--help` to see a list of commands.
