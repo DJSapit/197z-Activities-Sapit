@@ -30,8 +30,6 @@ def get_args():
 if __name__ == "__main__":
     checkpoint = "kws_model.pt"
     if not os.path.exists(checkpoint):
-        os.makedirs(os.path.dirname(checkpoint), exist_ok=True)
-        fname = os.path.basename(checkpoint)
         url = f'https://github.com/DJSapit/197z-Activities-Sapit/releases/download/v0.1.1-alpha/kws_model.pt'
         print(f'downloading pretrained model from {url}')
         r = requests.get(url, allow_redirects=True)
