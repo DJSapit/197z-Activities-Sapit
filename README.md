@@ -36,7 +36,7 @@ KWS Inference
 python kws-infer.py
 ```
 Pretrained Model is automatically downloaded. Use '--button' flag to enable manual activation of recording.
-Press 'q' and 'esc' to quit, and any other key to activate recording.
+Press 'q' or 'esc' to quit, and any other key to activate recording.
 
 
 For `train.py` and `kws-infer.py`, add `-h` or `--help` to see a list of commands.
