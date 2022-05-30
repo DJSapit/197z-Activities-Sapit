@@ -45,4 +45,4 @@ Code is heavily referenced from the following github links:
 [Transformer](https://github.com/roatienza/Deep-Learning-Experiments/blob/master/versions/2022/transformer/python/transformer_demo.ipynb) |
 [kws-infer](https://github.com/roatienza/Deep-Learning-Experiments/blob/master/versions/2022/supervised/python/kws-infer.py)
 ________
-### [Watch Demo video here]()
+### [Watch Demo video here](https://drive.google.com/file/d/10GhWJ28dCI0weOeIUKT0QZQpLAuTlRZT/view?usp=sharing)
